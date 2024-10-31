@@ -1,4 +1,0 @@
-CompileFlags:
-  Add:
-    - "-ID:/repo/shew/shewsrv/src/"
-    - "-ID:/repo/shew/shewsrv/third-party/open-source/sqlite/include"
