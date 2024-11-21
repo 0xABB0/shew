@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shew/music_sheet_image.dart';
 
 class PlayScreen extends StatefulWidget {
   final List<String> images;
@@ -33,9 +32,9 @@ class _PlayScreenState extends State<PlayScreen> {
       body: GestureDetector(
         onTap: nextSheet,
         child: Center(
-          child: MusicSheetImage(
-            imageUrl: widget.images[currentIndex],
-            fit: BoxFit.contain,
+          child: Image.asset(
+            widget.images[currentIndex],
+            fit: BoxFit.cover,
           ),
         ),
       ),
