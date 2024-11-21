@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shew/models/item.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shew/screens/play.dart';
 import 'dart:io';
 
 import 'package:shew/services/item_service.dart';
@@ -196,6 +197,20 @@ class _DetailPageState extends State<DetailPage> {
               }
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.play_arrow),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PlayScreen(
+                    images: widget.item.imagePaths,
+                    songName: widget.item.title,
+                  ),
+                ),
+              );
+            }
+          )
         ],
       ),
       body: SingleChildScrollView(

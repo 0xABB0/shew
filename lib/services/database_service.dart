@@ -1,16 +1,22 @@
+import 'dart:io';
+
+import 'package:shew/services/item_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart' as path_helper;
 
 void initDB() async {
-  
-  sqfliteFfiInit();
-  databaseFactory = databaseFactoryFfi;
+  if (Platform.isWindows || Platform.isLinux) {
+    // Initialize FFI
+    sqfliteFfiInit();
+    // Change the default factory
+    databaseFactory = databaseFactoryFfi;
+  }
   
   final database = await openDatabase(
     path_helper.join(await getDatabasesPath(), 'items_database.db'),
     onCreate: (db, version) {
       return db.execute(
-        '',
+        getItemTableCreationScript(),
       );
     },
     version: 1,

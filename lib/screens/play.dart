@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 class PlayScreen extends StatefulWidget {
@@ -32,8 +34,8 @@ class _PlayScreenState extends State<PlayScreen> {
       body: GestureDetector(
         onTap: nextSheet,
         child: Center(
-          child: Image.asset(
-            widget.images[currentIndex],
+          child: Image.file(
+            File(widget.images[currentIndex]),
             fit: BoxFit.cover,
           ),
         ),
