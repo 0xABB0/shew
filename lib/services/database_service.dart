@@ -6,21 +6,11 @@ import 'package:path/path.dart' as path_helper;
 
 void initDB() async {
   if (Platform.isWindows || Platform.isLinux) {
-    // Initialize FFI
     sqfliteFfiInit();
-    // Change the default factory
     databaseFactory = databaseFactoryFfi;
   }
   
-  final database = await openDatabase(
-    path_helper.join(await getDatabasesPath(), 'items_database.db'),
-    onCreate: (db, version) {
-      return db.execute(
-        getItemTableCreationScript(),
-      );
-    },
-    version: 1,
-  );
+  final database = await getDatabase();
 
   final List<Map<String, dynamic>> items = await database.query('items');
   if (items.isEmpty) {
@@ -35,8 +25,18 @@ void initDB() async {
 }
 
 Future<Database> getDatabase() async {
-  return openDatabase(
+  return await openDatabase(
     path_helper.join(await getDatabasesPath(), 'items_database.db'),
-    version: 1,
+    onCreate: schemaCreation,
+    onUpgrade: schemaUpgrade,
+    version: 2,
   );
+}
+
+Future<void> schemaCreation(db, version) async {
+  await create_ItemSchema(db, version);
+}
+
+Future<void> schemaUpgrade(db, oldVersion, newVersion) async {
+  await upgrade_ItemSchema(db, oldVersion, newVersion);
 }

@@ -6,9 +6,9 @@ import 'dart:io';
 
 
 class DetailPage extends StatefulWidget {
-  Item item;
+  final Item item;
 
-  DetailPage({
+  const DetailPage({
     super.key,
     required this.item,
   });
@@ -98,9 +98,7 @@ class _DetailPageState extends State<DetailPage> {
             onPressed: () async{
               Item? newItem = await _navigateToEdit(context);
               if (newItem != null) {
-                setState(() {
-                  widget.item = newItem;
-                });
+                setState(() {});
               }
             },
           ),
