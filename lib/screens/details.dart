@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:shew/models/item.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:shew/screens/edit_song.dart';
 import 'package:shew/screens/play.dart';
 import 'dart:io';
 
-import 'package:shew/services/item_service.dart';
 
 class DetailPage extends StatefulWidget {
-  final Item item;
+  Item item;
 
-  const DetailPage({
+  DetailPage({
     super.key,
     required this.item,
   });
@@ -19,88 +18,6 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
-  bool _isEditing = false;
-  late TextEditingController _titleController;
-  late TextEditingController _descriptionController;
-  final ImagePicker _picker = ImagePicker();
-
-  @override
-  void initState() {
-    super.initState();
-    _titleController = TextEditingController(text: widget.item.title);
-    _descriptionController = TextEditingController(text: widget.item.description);
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _pickImages(BuildContext context) async {
-    try {
-      final List<XFile> images = await _picker.pickMultiImage();
-      if (images.isNotEmpty) {
-        setState(() {
-          widget.item.imagePaths.addAll(images.map((image) => image.path));
-        });
-      }
-    } catch (e) {
-      if (!mounted) return;
-      
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error picking images: $e')),
-        );
-      }
-    }
-  }
-
-  void _removeImage(int index) {
-    setState(() {
-      widget.item.imagePaths.removeAt(index);
-    });
-  }
-
-  Future<void> _saveChanges(BuildContext context) async {
-    final String newTitle = _titleController.text;
-    final String newDescription = _descriptionController.text;
-    final List<String> currentImagePaths = List.from(widget.item.imagePaths);
-    final bool wasEditing = _isEditing;
-    
-    try {
-      widget.item.title = newTitle;
-      widget.item.description = newDescription;
-      await updateItem(widget.item);
-      
-      if (!mounted) return;
-      
-      setState(() {
-        _isEditing = false;
-      });
-      
-      if (context.mounted) {
-        Navigator.pop(context, true);
-      }
-    } catch (e) {
-      if (!mounted) return;
-      
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving changes: $e')),
-        );
-      }
-      
-      setState(() {
-        widget.item.title = widget.item.title;
-        widget.item.description = widget.item.description;
-        widget.item.imagePaths = currentImagePaths;
-        _isEditing = wasEditing;
-      });
-    }
-  }
-
   Widget _buildImageGallery() {
     if (widget.item.imagePaths.isEmpty) {
       return Container(
@@ -132,7 +49,8 @@ class _DetailPageState extends State<DetailPage> {
                           return const SizedBox(
                             width: 200,
                             child: Center(
-                              child: Icon(Icons.error_outline, color: Colors.red),
+                              child:
+                                  Icon(Icons.error_outline, color: Colors.red),
                             ),
                           );
                         },
@@ -146,35 +64,25 @@ class _DetailPageState extends State<DetailPage> {
                           return const SizedBox(
                             width: 200,
                             child: Center(
-                              child: Icon(Icons.error_outline, color: Colors.red),
+                              child:
+                                  Icon(Icons.error_outline, color: Colors.red),
                             ),
                           );
                         },
                       ),
-              ),
-              if (_isEditing)
-                Positioned(
-                  top: 8,
-                  right: 16,
-                  child: GestureDetector(
-                    onTap: () => _removeImage(index),
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.close,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ),
+              )
             ],
           );
         },
+      ),
+    );
+  }
+
+  Future<Item?> _navigateToEdit(BuildContext context) {
+    return Navigator.push<Item>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditSongPage(item: widget.item),
       ),
     );
   }
@@ -183,34 +91,32 @@ class _DetailPageState extends State<DetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Item' : widget.item.title),
+        title: Text(widget.item.title),
         actions: [
           IconButton(
-            icon: Icon(_isEditing ? Icons.save : Icons.edit),
-            onPressed: () {
-              if (_isEditing) {
-                _saveChanges(context);
-              } else {
+            icon: const Icon(Icons.edit),
+            onPressed: () async{
+              Item? newItem = await _navigateToEdit(context);
+              if (newItem != null) {
                 setState(() {
-                  _isEditing = true;
+                  widget.item = newItem;
                 });
               }
             },
           ),
           IconButton(
-            icon: const Icon(Icons.play_arrow),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PlayScreen(
-                    images: widget.item.imagePaths,
-                    songName: widget.item.title,
+              icon: const Icon(Icons.play_arrow),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PlayScreen(
+                      images: widget.item.imagePaths,
+                      songName: widget.item.title,
+                    ),
                   ),
-                ),
-              );
-            }
-          )
+                );
+              })
         ],
       ),
       body: SingleChildScrollView(
@@ -220,40 +126,15 @@ class _DetailPageState extends State<DetailPage> {
           children: [
             _buildImageGallery(),
             const SizedBox(height: 16),
-            if (_isEditing) ...[
-              ElevatedButton.icon(
-                onPressed: () => _pickImages(context),
-                icon: const Icon(Icons.photo_library),
-                label: const Text('Add Images'),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Title',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 3,
-              ),
-            ] else ...[
-              Text(
-                widget.item.title,
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                widget.item.description,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-            ],
+            Text(
+              widget.item.title,
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              widget.item.description,
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
           ],
         ),
       ),

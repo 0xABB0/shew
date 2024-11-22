@@ -6,11 +6,11 @@ import 'package:shew/services/database_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   initDB();
-  runApp(const MyApp());
+  runApp(const ShewApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ShewApp extends StatelessWidget {
+  const ShewApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +19,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(),
+      home: const ShewHomePage(),
     );
   }
 }
-

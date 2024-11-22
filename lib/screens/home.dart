@@ -3,14 +3,14 @@ import 'package:shew/models/item.dart';
 import 'package:shew/screens/details.dart';
 import 'package:shew/services/item_service.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+class ShewHomePage extends StatefulWidget {
+  const ShewHomePage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<ShewHomePage> createState() => _ShewHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _ShewHomePageState extends State<ShewHomePage> {
   late Future<List<Item>> _itemsFuture;
 
   @override
